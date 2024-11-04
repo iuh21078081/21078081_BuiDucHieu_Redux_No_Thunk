@@ -1,5 +1,5 @@
 // todoReducer.js
-import { FETCH_TODOS_REQUEST, FETCH_TODOS_SUCCESS, FETCH_TODOS_FAILURE, DELETE_TODO, ADD_TODO, UPDATE_TODO } from './todoAction';
+import { FETCH_TODOS , DELETE_TODO, ADD_TODO, UPDATE_TODO } from './todoAction';
 
 const initialState = {
     items: [],
@@ -9,12 +9,8 @@ const initialState = {
 
 const todoReducer = (state = initialState, action) => {
     switch (action.type) {
-        case FETCH_TODOS_REQUEST:
-            return { ...state, loading: true, error: null };
-        case FETCH_TODOS_SUCCESS:
+        case FETCH_TODOS:
             return { ...state, loading: false, items: action.payload };
-        case FETCH_TODOS_FAILURE:
-            return { ...state, loading: false, error: action.error };
         case ADD_TODO:
             return { ...state, items: [...state.items, action.payload] };
         case UPDATE_TODO:

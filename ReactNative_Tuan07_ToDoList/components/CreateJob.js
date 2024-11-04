@@ -3,21 +3,50 @@ import { View, TextInput, TouchableOpacity, Text, Image, StyleSheet, Pressable }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { addTodo, updateJob } from '../redux/todoAction';
+import { addTodo, updateTodo } from '../redux/todoAction';
 const AddJobScreen = ({route, navigation}) => {
     const [job, setJob] = useState('');
     const dispatch = useDispatch();
     const isUpdate = route.params?.isUpdate || false;
     const item = route.params?.item || {};
-    const handleAddJob = () => {
-        if(isUpdate){
-            dispatch(updateJob({...item, title: job}));
-            navigation.navigate('ToDoListScreen');
-        }else{
-            dispatch(addTodo(job));
-            navigation.navigate('ToDoListScreen');
-        }
-    }
+    const handleAddJob = async () => {
+      if (isUpdate) {
+          const updatedJob = { ...item, title: job };
+          try {
+              const response = await fetch(`${apiLink}/${item.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(updatedJob),
+              });
+              if (response.ok) {
+                  const result = await response.json(); // Lấy job đã cập nhật từ server
+                  dispatch(updateTodo(result)); // Chỉ dispatch nếu thành công
+                  navigation.navigate('ToDoListScreen');
+              } else {
+                  console.error('Failed to update job', await response.text());
+              }
+          } catch (error) {
+              console.error('Error updating job:', error);
+          }
+      } else {
+          try {
+              const response = await fetch(apiLink, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ title: job, status: false }),
+              });
+              if (response.ok) {
+                  const newTodo = await response.json(); 
+                  dispatch(addTodo(newTodo)); 
+                  navigation.navigate('ToDoListScreen');
+              } else {
+                  console.error('Failed to add job', await response.text());
+              }
+          } catch (error) {
+              console.error('Error adding job:', error);
+          }
+      }
+  };
 
     useEffect(()=>{
         if(isUpdate){
